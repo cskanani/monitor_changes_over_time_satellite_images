@@ -9,6 +9,12 @@ from skimage import img_as_ubyte
 from skimage.util import view_as_windows, pad
 from sklearn.metrics import classification_report
 
+def get_dii(pre_mask, post_mask):
+    diff_pixels = post_mask - pre_mask
+    diff_pixels[diff_pixels >= 0] = 0.0
+    diff_pixels[diff_pixels < 0] = 1.0
+    return (diff_pixels.sum() / pre_mask.sum()) * 36
+
 def get_prediction_mask(mask_prediction):
     patch_size = (256, 256)
     prediction_size = (1536, 1536)
@@ -89,6 +95,8 @@ def get_predictions(pre_image_filename, post_image_filename):
     post_mask[post_mask > 0.5] = 1.0
     post_mask[post_mask <= 0.5] = 0.0
 
+    dii = get_dii(pre_mask, post_mask)
+
     post_image = cv2.imread(post_image_filename)
     green_mask = np.zeros((post_image.shape))
     red_mask = np.zeros((post_image.shape))
@@ -111,4 +119,6 @@ def get_predictions(pre_image_filename, post_image_filename):
     # cv2.imwrite('pre.jpg', pre_mask)
     # cv2.imwrite('post.jpg', post_mask)
     
-    return post_image, added_pixels, distroyed_pixels
+    return post_image, dii, added_pixels, distroyed_pixels
+
+# get_predictions(sys.argv[1], sys.argv[2])
