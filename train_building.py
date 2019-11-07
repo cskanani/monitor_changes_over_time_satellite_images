@@ -35,40 +35,39 @@ def get_patches(image, mask):
     )
 
     image_patches = view_as_windows(
-        image, window_shape=patch_size, step=step_size
-    ).reshape((-1, ) + step_size)
+        image, window_shape=patch_size, step=patch_size
+    ).reshape((-1, ) + patch_size)
     mask_patches = view_as_windows(
-        mask, window_shape=patch_size, step=step_size
-    ).reshape((-1, ) + step_size)
+        mask, window_shape=patch_size, step=patch_size
+    ).reshape((-1, ) + patch_size)
 
     return zip(image_patches, mask_patches)
 
-def data_generator(images_dir, masks_dir):
+def data_generator(data_dir, images_dir, masks_dir):
 
     # we create two instances with the same arguments
-    data_gen_args = dict(featurewise_center=True,
-                     featurewise_std_normalization=True,
-                     rotation_range=45,
+    data_gen_args = dict(rotation_range=45,
                      width_shift_range=0.1,
                      height_shift_range=0.1,
                      rescale=1/255.,
                      zoom_range=0.2)
+
     image_datagen = ImageDataGenerator(**data_gen_args)
     mask_datagen = ImageDataGenerator(**data_gen_args)
 
-    # Provide the same seed and keyword arguments to the fit and flow methods
     seed = 1
-    image_datagen.fit(images, augment=True, seed=seed)
-    mask_datagen.fit(masks, augment=True, seed=seed)
 
     image_generator = image_datagen.flow_from_directory(
-        images_dir,
+        data_dir,
+        classes = [images_dir],
         class_mode=None,
+        batch_size=1,
         seed=seed)
-
     mask_generator = mask_datagen.flow_from_directory(
-        masks_dir,
+        data_dir,
+        classes = [masks_dir],
         class_mode=None,
+        batch_size=1,
         seed=seed)
 
     # generating image patches and then training model to preven data loss
@@ -77,14 +76,19 @@ def data_generator(images_dir, masks_dir):
         mask_batch[mask_batch <= 0.5] = 0.
         for image, mask in zip(image_batch, mask_batch):
             for image_patch, mask_patch in get_patches(image, mask):
-                yield (np.expand_dims(image_patch, axis=0), np.expand_dims(mask_patch, axis=0))
+                yield (np.expand_dims(image_patch, axis=0), 
+                	np.expand_dims(mask_patch, axis=0)
+                )
 
-train_data = data_generator(1, 'building_data/train', 'images', 'labels')
-validation_data = data_generator(1, 'building_data/val', 'images', 'labels')
+train_data_dir = '../building_data/train/'
+val_data_dir = '../building_data/val/'
+train_data = data_generator(train_data_dir, 'images', 'labels')
+validation_data = data_generator(val_data_dir, 'images', 'labels')
 
+save_model_path = 'saved_model/unet_building_detection.hdf5'
 model = unet.unet(input_size=(256, 256, 1))
 model_checkpoint = ModelCheckpoint(
-    'saved_model/building_det.hdf5',
+    save_model_path,
     monitor='val_loss',
     save_best_only=True
 )
