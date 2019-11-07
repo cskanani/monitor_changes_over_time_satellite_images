@@ -13,5 +13,5 @@ file_list = list_files(directory)
 for filename in file_list:
     if(filename[-4:] == '.tif'):
         new_filename = filename[:-4] + '.jpg'
-        img = Image.open(x)
+        img = Image.open(filename)
         img.save(new_filename, optimize=False, quality=100)
