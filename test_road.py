@@ -8,6 +8,17 @@ from skimage import img_as_ubyte
 from skimage.util import view_as_windows, pad
 from sklearn.metrics import classification_report
 
+# Obtained Results
+#               precision    recall  f1-score   support
+
+#          0.0       0.98      0.99      0.99 105069645
+#          1.0       0.81      0.67      0.73   5180355
+
+#     accuracy                           0.98 110250000
+#    macro avg       0.90      0.83      0.86 110250000
+# weighted avg       0.98      0.98      0.98 110250000
+
+
 def get_prediction_masks(patch_predictions):
     patch_size = (256, 256)
     patches_per_row = 6

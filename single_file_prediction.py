@@ -13,7 +13,7 @@ def get_dii(pre_mask, post_mask):
     diff_pixels = post_mask - pre_mask
     diff_pixels[diff_pixels >= 0] = 0.0
     diff_pixels[diff_pixels < 0] = 1.0
-    return (diff_pixels.sum() / pre_mask.sum()) * 36
+    return (diff_pixels.sum() / pre_mask.sum())
 
 def get_prediction_mask(mask_prediction):
     patch_size = (256, 256)
@@ -121,4 +121,6 @@ def get_predictions(pre_image_filename, post_image_filename):
     
     return post_image, dii, added_pixels, distroyed_pixels
 
-# get_predictions(sys.argv[1], sys.argv[2])
+# post_image, dii, added_pixels, distroyed_pixels = get_predictions(sys.argv[1], sys.argv[2])
+# print(post_image)
+# cv2.imwrite('2_pred.jpg', post_image)
