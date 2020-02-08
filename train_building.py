@@ -1,5 +1,4 @@
-
-import model
+import unet
 
 import numpy as np
 from skimage.util import view_as_windows, pad
