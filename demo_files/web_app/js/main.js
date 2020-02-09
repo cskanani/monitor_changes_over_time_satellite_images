@@ -21,6 +21,8 @@ $('#file_uploads').submit(function(e){
 // get live messages from python file
 function start_task(data) {
   source = new EventSource('co.php?fname=' + data);
+  var r = document.getElementById('progress_data');
+  r.innerHTML = '';
   $('#live_progress').addClass('current');
   $('#data_upload').removeClass('current');
   $('*[data-tab="data_upload"]').addClass('disabled');
@@ -33,7 +35,10 @@ function start_task(data) {
     var result = JSON.parse(e.data);
     if (result.message.substring(0, 4) == 'JSON') {
       var json_content = result.message.substring(5);
-      $('#output_json').html('<pre>' + json_content + '</pre>');
+      jQuery.get(json_content, function(json_data) {
+        $('#output_json').html('<pre>' + JSON.stringify(json_data, null, 4) + '</pre>');
+      });
+      
       $('*[data-tab="output_json"]').removeClass('disabled');
       $('*[data-tab="data_upload"]').removeClass('disabled');
       source.close();
